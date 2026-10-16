@@ -1,0 +1,194 @@
+@import "tailwindcss";
+@import "@fortawesome/fontawesome-free/css/all.min.css";
+
+/* ------------------------------------------------------------------
+   Estilo AdminSena: azul oscuro #081B28 + verde SENA #39A900 (Inter)
+   Los nombres de color se usan en las vistas nuevas; los valores
+   reproducen el estilo original del proyecto.
+   ------------------------------------------------------------------ */
+@theme {
+    --font-sans:
+        "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+    --color-sena-50: #e8f7df;
+    --color-sena-100: #d3efc2;
+    --color-sena-200: #83db55;
+    --color-sena-400: #65d62e;
+    --color-sena-500: #39a900;
+    --color-sena-600: #2e8800;
+    --color-sena-700: #278000;
+
+    --color-azul-50: #eef3f7;
+    --color-azul-100: #cbd5e1;
+    --color-azul-700: #1d3a50;
+    --color-azul-800: #101d2d;
+    --color-azul-900: #081b28;
+    --color-azul-950: #061620;
+
+    --color-tinta: #111827;
+    --color-papel: #f7f9f6;
+    --color-linea: #e5e7eb;
+
+    --color-oro-50: #fffbeb;
+    --color-oro-500: #f59e0b;
+    --color-oro-700: #b45309;
+}
+
+@layer base {
+    body {
+        @apply font-sans;
+    }
+}
+
+@layer components {
+    /* Formularios */
+    .campo {
+        @apply w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-sena-500 focus:ring-2 focus:ring-sena-500/20;
+    }
+
+    input[type="file"].campo {
+        @apply py-2.5 file:mr-4 file:rounded-lg file:border-0 file:bg-sena-50 file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-sena-700;
+    }
+
+    .etiqueta {
+        @apply mb-2 block text-sm font-semibold text-gray-700;
+    }
+
+    .etiqueta:has(+ .campo:required)::after,
+    .etiqueta:has(+ div > .campo:required)::after {
+        content: " *";
+        @apply text-red-500;
+    }
+
+    .ayuda {
+        @apply mt-1.5 text-xs text-gray-400;
+    }
+
+    .casilla {
+        @apply h-4 w-4 rounded border-gray-300 accent-sena-500;
+    }
+
+    /* Botones */
+    .btn-primario {
+        @apply inline-flex items-center justify-center gap-2 rounded-xl bg-sena-500 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-sena-600 focus:outline-none focus:ring-2 focus:ring-sena-500 focus:ring-offset-2;
+    }
+
+    .btn-secundario {
+        @apply inline-flex items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-5 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-50;
+    }
+
+    .btn-peligro {
+        @apply inline-flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50;
+    }
+
+    .btn-icono {
+        @apply flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-gray-900;
+    }
+
+    /* Superficies */
+    .tarjeta {
+        @apply rounded-2xl border border-gray-200 bg-white shadow-sm;
+    }
+
+    .tarjeta-titulo {
+        @apply font-semibold text-gray-900;
+    }
+
+    /* Tablas */
+    .th {
+        @apply bg-gray-50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500;
+    }
+
+    .td {
+        @apply px-6 py-4 align-middle;
+    }
+
+    .fila {
+        @apply transition-colors hover:bg-papel;
+    }
+
+    .insignia {
+        @apply inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold;
+    }
+
+    .avatar {
+        @apply flex shrink-0 items-center justify-center rounded-xl bg-sena-50 text-sena-700;
+    }
+
+    .enlace {
+        @apply font-semibold text-sena-700 hover:underline;
+    }
+
+    /* Secciones dentro de un formulario */
+    .seccion {
+        @apply grid gap-x-8 gap-y-5 border-t border-gray-100 pt-7 first:border-t-0 first:pt-0 lg:grid-cols-[12rem_minmax(0,1fr)];
+    }
+
+    .seccion-titulo {
+        @apply text-sm font-bold text-gray-900;
+    }
+
+    .seccion-ayuda {
+        @apply mt-1 text-xs leading-relaxed text-gray-500;
+    }
+
+    .opcion {
+        @apply flex cursor-pointer items-center gap-3 rounded-xl border border-gray-200 px-3 py-2.5 text-sm transition hover:bg-gray-50 has-[:checked]:border-sena-500 has-[:checked]:bg-sena-50 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-sena-500/30;
+    }
+
+    /* Resumen de cifras sobre los listados */
+    .cifra {
+        @apply flex items-center gap-4 bg-white px-5 py-4;
+    }
+
+    .cifra-valor {
+        @apply text-2xl font-bold leading-none text-gray-900 tabular-nums;
+    }
+
+    .cifra-texto {
+        @apply mt-1 text-sm text-gray-500;
+    }
+}
+
+/* Animación de entrada para las páginas públicas y de acceso */
+@media (prefers-reduced-motion: no-preference) {
+    [data-aparece] {
+        animation: aparece 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    }
+
+    [data-aparece="2"] {
+        animation-delay: 0.1s;
+    }
+    [data-aparece="3"] {
+        animation-delay: 0.2s;
+    }
+
+    @keyframes aparece {
+        from {
+            opacity: 0;
+            transform: translateY(14px);
+        }
+        to {
+            opacity: 1;
+            transform: none;
+        }
+    }
+}
+
+html,
+body {
+    min-height: 100%;
+    height: auto;
+    overflow-y: auto !important;
+    overflow-x: hidden;
+}
+
+body {
+    position: relative;
+}
+
+main {
+    min-height: 100vh;
+    height: auto;
+    overflow-y: visible;
+}
