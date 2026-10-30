@@ -35,7 +35,11 @@ class AuthController extends Controller
         if (session('api_token')) {
             return redirect()->route('home');
         }
-        return view('Auth.registro');
+        $url = env('URL_API');
+        // Listas para los datos del rol: ficha (aprendiz) y área (instructor)
+        $fichas = Http::get($url . '/fichas')->json();
+        $areas = Http::get($url . '/areas')->json();
+        return view('Auth.registro', compact('fichas', 'areas'));
     }
     public function registrar(Request $request)
     {

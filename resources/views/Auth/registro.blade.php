@@ -37,6 +37,7 @@
 
         <div class="mt-8">
             @include('Includes.mensajes')
+            @include('Includes.errores')
         </div>
 
         <form action="{{ route('registro.post') }}" method="POST" enctype="multipart/form-data" id="formRegistro">
@@ -82,13 +83,13 @@
                                 @if ($obligatorio)<span class="text-red-500">*</span>@else<span class="font-normal text-gray-400">(opcional)</span>@endif
                             </label>
                             <input type="text" id="{{ $campo }}" name="{{ $campo }}" value="{{ old($campo) }}" maxlength="20"
-                                pattern="[A-Za-z]+" title="Solo letras, sin tildes ni espacios" class="{{ $claseCampo }}" {{ $obligatorio ? 'required' : '' }}>
+                                pattern="[A-Za-zÁÉÍÓÚáéíóúÑñÜü ]+" title="Solo letras" class="{{ $claseCampo }}" {{ $obligatorio ? 'required' : '' }}>
                         </div>
                     @endforeach
                 </div>
                 <p class="mt-3 flex items-start gap-2 rounded-xl bg-amber-50 p-3 text-xs text-amber-700">
                     <i class="fa-solid fa-circle-info mt-0.5"></i>
-                    Usa solo letras, sin tildes, sin ñ y sin espacios en cada campo.
+                    Usa solo letras. Puedes escribir tildes y ñ.
                 </p>
 
                 <div class="mt-5 grid gap-4 sm:grid-cols-[1fr_1.4fr]">
@@ -105,6 +106,32 @@
                         <input type="text" id="identificacion" name="identificacion" value="{{ old('identificacion') }}" required inputmode="numeric"
                             placeholder="1061234567" class="{{ $claseCampo }}">
                     </div>
+                </div>
+
+                {{-- Datos propios del rol: solo se muestra (y se envía) el del rol elegido en el paso 1 --}}
+                @php $claseEtiquetaRol = 'mb-2 block text-sm font-semibold text-gray-700'; @endphp
+                <div data-rol-campos="aprendiz" class="mt-6 border-t border-gray-100 pt-6">
+                    <p class="mb-4 flex items-center gap-2 text-sm font-bold text-[#081B28]">
+                        <i class="fa-solid fa-user-graduate text-[#39A900]"></i> Tu formación
+                    </p>
+                    @include('Includes.campos-aprendiz', [
+                        'fichas' => $fichas ?? [],
+                        'conEstado' => false,
+                        'clase' => $claseCampo,
+                        'claseEtiqueta' => $claseEtiquetaRol,
+                        'prefijo' => 'registro_aprendiz',
+                    ])
+                </div>
+                <div data-rol-campos="instructor" class="mt-6 border-t border-gray-100 pt-6">
+                    <p class="mb-4 flex items-center gap-2 text-sm font-bold text-[#081B28]">
+                        <i class="fa-solid fa-chalkboard-user text-[#39A900]"></i> Tu vinculación
+                    </p>
+                    @include('Includes.campos-instructor', [
+                        'areas' => $areas ?? [],
+                        'clase' => $claseCampo,
+                        'claseEtiqueta' => $claseEtiquetaRol,
+                        'prefijo' => 'registro_instructor',
+                    ])
                 </div>
             </fieldset>
 
@@ -138,7 +165,7 @@
                             <div>
                                 <label for="{{ $campo }}" class="mb-2 block text-sm font-semibold text-gray-700">{{ $texto }} <span class="text-red-500">*</span></label>
                                 <div class="relative">
-                                    <input type="password" id="{{ $campo }}" name="{{ $campo }}" required maxlength="8" autocomplete="new-password"
+                                    <input type="password" id="{{ $campo }}" name="{{ $campo }}" required minlength="8" autocomplete="new-password"
                                         class="{{ $claseCampo }} pr-12">
                                     <button type="button" data-ver-clave="{{ $campo }}" aria-label="Mostrar contraseña"
                                         class="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-gray-400 hover:text-[#081B28]">
@@ -156,7 +183,7 @@
                             @endfor
                         </div>
                         <div class="mt-2 flex items-center justify-between text-xs">
-                            <span id="textoClave" class="text-gray-400">Hasta 8 caracteres. Combina letras y números.</span>
+                            <span id="textoClave" class="text-gray-400">Mínimo 8 caracteres. Combina letras y números.</span>
                             <span id="coincideClave" class="hidden font-semibold"></span>
                         </div>
                     </div>
@@ -204,6 +231,7 @@
 @endsection
 
 @include('Auth._ver-clave')
+@include('Includes.campos-por-rol')
 
 @push('scripts')
     <script>
@@ -273,7 +301,7 @@
             function revisarClave() {
                 const v = clave.value;
                 let puntos = 0;
-                if (v.length >= 6) puntos++;
+                if (v.length >= 8) puntos++;
                 if (/[A-Z]/.test(v) && /[a-z]/.test(v)) puntos++;
                 if (/\d/.test(v)) puntos++;
                 if (/[^A-Za-z0-9]/.test(v)) puntos++;
@@ -283,7 +311,7 @@
                     barra.className = 'h-1.5 flex-1 rounded-full transition ' + (v && i < Math.max(puntos, 1) ? colores[Math.max(puntos, 1) - 1] : 'bg-gray-200');
                 });
                 const texto = document.getElementById('textoClave');
-                texto.textContent = v ? textos[Math.max(puntos, 1) - 1] : 'Hasta 8 caracteres. Combina letras y números.';
+                texto.textContent = v ? textos[Math.max(puntos, 1) - 1] : 'Mínimo 8 caracteres. Combina letras y números.';
                 texto.className = v ? 'font-semibold text-gray-600' : 'text-gray-400';
 
                 const coincide = document.getElementById('coincideClave');

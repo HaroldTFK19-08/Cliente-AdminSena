@@ -16,6 +16,8 @@ use App\Http\Controllers\InscripcionesController;
 use App\Http\Controllers\NoticiasController;
 use App\Http\Controllers\AsignacionesController;
 use App\Http\Controllers\PerfilesController;
+use App\Http\Controllers\AprendicesController;
+use App\Http\Controllers\InstructoresController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PublicoController;
@@ -60,6 +62,45 @@ Route::post('/logout', [AuthController::class, 'logout'])
 Route::get('/home', [HomeController::class, 'index'])
     ->middleware('sesion.api')
     ->name('home');
+
+/*
+|--------------------------------------------------------------------------
+| Aprendices e instructores: CRUD abierto (no necesita sesión)
+|--------------------------------------------------------------------------
+| En AdminSena estas rutas no piden token, así que aquí tampoco se exige
+| iniciar sesión. Solo el panel del administrador está protegido.
+*/
+// Aprendices (registra el usuario y su perfil de aprendiz)
+Route::get('/aprendices', [AprendicesController::class, 'index'])
+    ->name('aprendices.index');
+Route::get('/aprendices/registro', [AprendicesController::class, 'create'])
+    ->name('aprendices.create');
+Route::post('/aprendices', [AprendicesController::class, 'store'])
+    ->name('aprendices.store');
+Route::get('/aprendices/{id}', [AprendicesController::class, 'show'])
+    ->name('aprendices.show');
+Route::get('/aprendices/{id}/editar', [AprendicesController::class, 'edit'])
+    ->name('aprendices.edit');
+Route::put('/aprendices/{id}', [AprendicesController::class, 'update'])
+    ->name('aprendices.update');
+Route::delete('/aprendices/{id}', [AprendicesController::class, 'destroy'])
+    ->name('aprendices.destroy');
+
+// Instructores (registra el usuario y su perfil de instructor)
+Route::get('/instructores', [InstructoresController::class, 'index'])
+    ->name('instructores.index');
+Route::get('/instructores/registro', [InstructoresController::class, 'create'])
+    ->name('instructores.create');
+Route::post('/instructores', [InstructoresController::class, 'store'])
+    ->name('instructores.store');
+Route::get('/instructores/{id}', [InstructoresController::class, 'show'])
+    ->name('instructores.show');
+Route::get('/instructores/{id}/editar', [InstructoresController::class, 'edit'])
+    ->name('instructores.edit');
+Route::put('/instructores/{id}', [InstructoresController::class, 'update'])
+    ->name('instructores.update');
+Route::delete('/instructores/{id}', [InstructoresController::class, 'destroy'])
+    ->name('instructores.destroy');
 
 /*
 |--------------------------------------------------------------------------
@@ -291,9 +332,9 @@ Route::middleware(['sesion.api', 'rol.admin'])->group(function () {
     Route::delete('/asignaciones/{id}', [AsignacionesController::class, 'destroy'])
         ->name('asignaciones.destroy');
 
-    // Perfiles por rol: admins, instructores, aprendices, aspirantes
+    // Perfiles por rol: admins y aspirantes (aprendices e instructores tienen su propio CRUD)
     Route::prefix('perfiles/{tipo}')
-        ->where(['tipo' => 'admins|instructores|aprendices|aspirantes'])
+        ->where(['tipo' => 'admins|aspirantes'])
         ->group(function () {
             Route::get('/', [PerfilesController::class, 'index'])
                 ->name('perfiles.index');

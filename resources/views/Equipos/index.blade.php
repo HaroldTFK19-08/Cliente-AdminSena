@@ -210,7 +210,7 @@
                                             <i class="fa-regular fa-pen-to-square text-sm"></i>
                                         </a>
                                         <form action="{{ route('equipos.destroy', $id) }}" method="POST"
-                                              onsubmit="return confirm('¿Eliminar el equipo «{{ addslashes($nombreDe($equipo)) }}»?\nEsta acción no se puede deshacer.')"
+                                              data-confirmar="¿Eliminar el equipo «{{ addslashes($nombreDe($equipo)) }}»?\nEsta acción no se puede deshacer."
                                               class="inline">
                                             @csrf
                                             @method('DELETE')

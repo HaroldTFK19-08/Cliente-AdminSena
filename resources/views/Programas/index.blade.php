@@ -155,7 +155,7 @@
                                         </a>
 
                                         <form action="{{ route('programas.destroy', data_get($programa, 'id')) }}"
-                                            method="POST" onsubmit="return confirm('¿Deseas eliminar este programa?')">
+                                            method="POST" data-confirmar="¿Deseas eliminar este programa?">
                                             @csrf
                                             @method('DELETE')
 

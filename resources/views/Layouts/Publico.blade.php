@@ -17,7 +17,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="overflow-y-hidden bg-white text-slate-800 antialiased selection:bg-[#39A900] selection:text-white">
+<body class="bg-white text-slate-800 antialiased selection:bg-[#39A900] selection:text-white">
     {{-- Barra de navegación: transparente sobre la portada y sólida al bajar --}}
     <header id="barraPublica" data-solida="{{ $__env->hasSection('barra-solida') ? '1' : '' }}" class="fixed inset-x-0 top-0 z-50 transition-all duration-300">
         <nav class="mx-auto flex h-20 max-w-7xl items-center justify-between gap-6 px-5 sm:px-8">

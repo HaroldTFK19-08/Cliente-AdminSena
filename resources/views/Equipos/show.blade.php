@@ -196,7 +196,7 @@
                         </a>
 
                         <form action="{{ route('equipos.destroy', $id) }}" method="POST"
-                            onsubmit="return confirm('¿Eliminar el equipo «{{ e($nombre) }}»?')">
+                            data-confirmar="¿Eliminar el equipo «{{ e($nombre) }}»?">
 
                             @csrf
                             @method('DELETE')

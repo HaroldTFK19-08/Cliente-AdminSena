@@ -10,7 +10,7 @@
             'volver' => ['url' => route('usuarios.show', data_get($usuario, 'id')), 'texto' => 'Volver al detalle'],
         ])
 
-        <form action="{{ route('usuarios.update', data_get($usuario, 'id')) }}" method="POST" enctype="multipart/form-data" class="tarjeta" novalidate>
+        <form action="{{ route('usuarios.update', data_get($usuario, 'id')) }}" method="POST" enctype="multipart/form-data" class="tarjeta">
             @csrf
             @method('PUT')
             <div class="flex items-center gap-3 border-b border-linea px-6 py-4 sm:px-8">

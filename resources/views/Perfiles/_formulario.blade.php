@@ -1,8 +1,6 @@
-{{-- Campos del perfil según el tipo (admins, instructores, aprendices, aspirantes) --}}
+{{-- Campos del perfil según el tipo (admins, aspirantes) --}}
 @php
     $perfil = $perfil ?? [];
-    $areas = $areas ?? [];
-    $fichas = $fichas ?? [];
 
     // Usuarios con el rol del perfil que aún no lo tienen (más el usuario actual al editar)
     $usuarios = collect($usuarios ?? [])->filter(fn($u) =>
@@ -45,68 +43,6 @@
             <label for="direccion" class="etiqueta">Dirección <span class="font-normal text-slate-400">(opcional)</span></label>
             <input type="text" id="direccion" name="direccion" maxlength="255" class="campo"
                 value="{{ old('direccion', data_get($perfil, 'direccion')) }}">
-        </div>
-    @endif
-
-    @if ($tipo === 'instructores')
-        <div>
-            <label for="area_id" class="etiqueta">Área</label>
-            <select id="area_id" name="area_id" required class="campo">
-                <option value="">Selecciona un área</option>
-                @foreach ($areas as $area)
-                    <option value="{{ data_get($area, 'id') }}" @selected(old('area_id', data_get($perfil, 'area_id')) == data_get($area, 'id'))>
-                        {{ data_get($area, 'nombre') }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-        <div>
-            <label for="especialidad" class="etiqueta">Especialidad</label>
-            <input type="text" id="especialidad" name="especialidad" required maxlength="150" class="campo"
-                value="{{ old('especialidad', data_get($perfil, 'especialidad')) }}" placeholder="Ej. Desarrollo de software">
-        </div>
-        <div>
-            <label for="tipo_instructor" class="etiqueta">Tipo de instructor</label>
-            <select id="tipo_instructor" name="tipo_instructor" required class="campo">
-                @foreach (['Planta', 'Contratista'] as $valor)
-                    <option value="{{ $valor }}" @selected(old('tipo_instructor', data_get($perfil, 'tipo_instructor')) === $valor)>{{ $valor }}</option>
-                @endforeach
-            </select>
-        </div>
-    @endif
-
-    @if ($tipo === 'aprendices')
-        <div>
-            <label for="course_group_id" class="etiqueta">Ficha</label>
-            <select id="course_group_id" name="course_group_id" required class="campo">
-                <option value="">Selecciona una ficha</option>
-                @foreach ($fichas as $ficha)
-                    <option value="{{ data_get($ficha, 'id') }}" @selected(old('course_group_id', data_get($perfil, 'course_group_id')) == data_get($ficha, 'id'))>
-                        {{ data_get($ficha, 'codigo') }} — {{ data_get($ficha, 'program.nombre') }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-        <div>
-            <label for="estado" class="etiqueta">Estado</label>
-            <select id="estado" name="estado" required class="campo">
-                @foreach (['Activo', 'Retirado', 'Certificado'] as $valor)
-                    <option value="{{ $valor }}" @selected(old('estado', data_get($perfil, 'estado', 'Activo')) === $valor)>{{ $valor }}</option>
-                @endforeach
-            </select>
-        </div>
-    @endif
-
-    @if (in_array($tipo, ['instructores', 'aprendices']))
-        <div>
-            <label for="fecha_inicio" class="etiqueta">Fecha de inicio</label>
-            <input type="date" id="fecha_inicio" name="fecha_inicio" required class="campo"
-                value="{{ old('fecha_inicio', Vista::fechaInput(data_get($perfil, 'fecha_inicio'))) }}">
-        </div>
-        <div>
-            <label for="fecha_fin" class="etiqueta">Fecha de finalización <span class="font-normal text-slate-400">(opcional)</span></label>
-            <input type="date" id="fecha_fin" name="fecha_fin" class="campo"
-                value="{{ old('fecha_fin', Vista::fechaInput(data_get($perfil, 'fecha_fin'))) }}">
         </div>
     @endif
 

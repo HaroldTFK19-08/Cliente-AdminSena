@@ -9,8 +9,6 @@
         // Columna propia de cada tipo de perfil: [encabezado, valor]
         $detalle = fn($p) => match ($tipo) {
             'admins' => [data_get($p, 'cargo'), data_get($p, 'ubicacion_oficina')],
-            'instructores' => [data_get($p, 'especialidad'), trim(data_get($p, 'area.nombre') . ', ' . data_get($p, 'tipo_instructor'), ', ')],
-            'aprendices' => ['Ficha ' . data_get($p, 'coursegroup.codigo', '—'), data_get($p, 'coursegroup.program.nombre')],
             'aspirantes' => ['EPS ' . data_get($p, 'eps', '—'), collect(['certificado_eps', 'certificado_bachiller', 'certificado_icfes'])->filter(fn($c) => data_get($p, $c))->count() . ' de 3 certificados'],
         };
     @endphp
@@ -18,7 +16,7 @@
     <div class="space-y-6">
         @include('Includes.encabezado', [
             'titulo' => 'Perfiles por rol',
-            'descripcion' => 'Datos propios de cada rol. Primero crea el usuario y luego complétale aquí su perfil.',
+            'descripcion' => 'Datos propios de administradores y aspirantes. Primero crea el usuario y luego complétale aquí su perfil.',
             'boton' => ['url' => route('perfiles.create', $tipo), 'texto' => 'Registrar ' . $config['singular']],
         ])
 
@@ -29,6 +27,15 @@
                     class="-mb-px inline-flex shrink-0 items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition {{ $clave === $tipo ? 'border-sena-500 text-azul-900' : 'border-transparent text-slate-500 hover:text-azul-900' }}">
                     <i class="fa-solid {{ $item['icono'] }} text-xs {{ $clave === $tipo ? 'text-sena-500' : '' }}"></i>
                     {{ $item['titulo'] }}
+                </a>
+            @endforeach
+            {{-- Aprendices e instructores tienen su propio CRUD (cuenta + perfil en un solo formulario) --}}
+            @foreach ([['aprendices.index', 'fa-user-graduate', 'Aprendices'], ['instructores.index', 'fa-chalkboard-user', 'Instructores']] as [$ruta, $icono, $texto])
+                <a href="{{ route($ruta) }}"
+                    class="-mb-px inline-flex shrink-0 items-center gap-2 border-b-2 border-transparent px-4 py-3 text-sm font-medium text-slate-500 transition hover:text-azul-900">
+                    <i class="fa-solid {{ $icono }} text-xs"></i>
+                    {{ $texto }}
+                    <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-400"></i>
                 </a>
             @endforeach
         </nav>
@@ -47,9 +54,6 @@
                             <th class="th">Usuario</th>
                             <th class="th">Identificación</th>
                             <th class="th">Detalle del perfil</th>
-                            @if ($tipo === 'aprendices')
-                                <th class="th">Estado</th>
-                            @endif
                             <th class="th text-right">Acciones</th>
                         </tr>
                     </thead>
@@ -73,11 +77,6 @@
                                     <p class="text-slate-800">{{ $principal ?: '—' }}</p>
                                     <p class="mt-0.5 text-xs text-slate-500">{{ $secundario }}</p>
                                 </td>
-                                @if ($tipo === 'aprendices')
-                                    <td class="td">
-                                        @include('Includes.estado', ['valor' => data_get($perfil, 'estado')])
-                                    </td>
-                                @endif
                                 <td class="td">
                                     @include('Includes.acciones', [
                                         'ver' => data_get($perfil, 'user_id') ? route('usuarios.show', data_get($perfil, 'user_id')) : null,
@@ -89,13 +88,13 @@
                             </tr>
                         @empty
                             @include('Includes.fila-vacia', [
-                                'columnas' => $tipo === 'aprendices' ? 5 : 4,
+                                'columnas' => 4,
                                 'icono' => $config['icono'],
                                 'mensaje' => 'No hay perfiles de ' . $config['singular'],
                                 'boton' => ['url' => route('perfiles.create', $tipo), 'texto' => 'Registrar ' . $config['singular']],
                             ])
                         @endforelse
-                        @include('Includes.sin-resultados', ['columnas' => $tipo === 'aprendices' ? 5 : 4])
+                        @include('Includes.sin-resultados', ['columnas' => 4])
                     </tbody>
                 </table>
             </div>

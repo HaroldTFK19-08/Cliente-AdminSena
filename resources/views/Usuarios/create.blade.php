@@ -6,11 +6,11 @@
     <div class="mx-auto max-w-3xl">
         @include('Includes.encabezado', [
             'titulo' => 'Nuevo usuario',
-            'descripcion' => 'Crea la cuenta; luego complétale el perfil según su rol.',
+            'descripcion' => 'Crea la cuenta y, si es aprendiz o instructor, sus datos del rol.',
             'volver' => ['url' => route('usuarios.index'), 'texto' => 'Volver a usuarios'],
         ])
 
-        <form action="{{ route('usuarios.store') }}" method="POST" enctype="multipart/form-data" class="tarjeta" novalidate>
+        <form action="{{ route('usuarios.store') }}" method="POST" enctype="multipart/form-data" class="tarjeta">
             @csrf
             <div class="flex items-center gap-3 border-b border-linea px-6 py-4 sm:px-8">
                 <span class="avatar h-9 w-9"><i class="fa-solid fa-user text-sm"></i></span>

@@ -28,7 +28,9 @@ class HomeController extends Controller
             return view('welcome', compact('usuario', 'usuarios', 'fichas', 'ofertas', 'inscripciones', 'equipos', 'ambientes', 'centros'));
         }
 
-        $usuarioApi = $this->fetch($url . '/usuarios/' . data_get($usuario, 'id'));
+        // /usuarios/{id} ahora es solo del admin: cada usuario consulta su propio
+        // perfil con /auth/me (la API lo identifica por el token de la sesión)
+        $usuarioApi = $this->fetch($url . '/auth/me');
         $ofertas = $this->fetch($url . '/ofertas');
         return view('welcome', compact('usuario', 'usuarioApi', 'ofertas'));
     }

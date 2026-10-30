@@ -33,7 +33,7 @@
                 <label for="password" class="mb-2 block text-sm font-semibold text-gray-700">Contraseña</label>
                 <div class="relative">
                     <i class="fa-solid fa-lock pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                    <input type="password" id="password" name="password" required maxlength="8" autocomplete="current-password"
+                    <input type="password" id="password" name="password" required autocomplete="current-password"
                         placeholder="••••••••"
                         class="w-full rounded-xl border border-gray-300 bg-gray-50/60 py-3.5 pl-11 pr-12 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-[#39A900] focus:bg-white focus:ring-4 focus:ring-[#39A900]/10">
                     <button type="button" data-ver-clave="password" aria-label="Mostrar contraseña"

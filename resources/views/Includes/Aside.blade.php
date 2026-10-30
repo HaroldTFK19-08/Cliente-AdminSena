@@ -37,19 +37,29 @@
             </a>
         HTML;
     };
-    $activo = fn(string ...$rutas) => collect($rutas)->contains(fn($r) => request()->is($r) || request()->is($r . '/*'));
+    $activo = fn(string ...$rutas) => collect($rutas)->contains(
+        fn($r) => request()->is($r) || request()->is($r . '/*'),
+    );
     $usuario = session('usuario');
+    $conSesion = (bool) session('api_token');
     $esAdmin = data_get($usuario, 'rol') === 'Admin';
-    $nombreUsuario = $usuario ? Vista::nombre($usuario, 'Usuario') : 'Usuario';
+    $nombreUsuario = $usuario ? Vista::nombre($usuario, 'Usuario') : 'Visitante';
     $fotoUsuario = Vista::archivo(data_get($usuario, 'foto_perfil'));
 
+    // Aprendices e instructores se gestionan sin iniciar sesión (igual que en la API)
+    $comunidad = [
+        [route('instructores.index'), 'fa-chalkboard-user', 'Instructores', $activo('instructores')],
+        [route('aprendices.index'), 'fa-user-graduate', 'Aprendices', $activo('aprendices')],
+    ];
+
     // Secciones del menú: [url, icono, texto, activo]
-    $secciones = $esAdmin
-        ? [
+    if ($esAdmin) {
+        $secciones = [
             'Principal' => [
                 [route('home'), 'fa-house', 'Inicio', request()->is('home')],
                 [route('usuarios.index'), 'fa-users', 'Usuarios', $activo('usuarios')],
-                [route('perfiles.index', 'instructores'), 'fa-id-card', 'Perfiles por rol', $activo('perfiles')],
+                ...$comunidad,
+                [route('perfiles.index', 'admins'), 'fa-id-card', 'Roles', $activo('perfiles')],
             ],
             'Gestión institucional' => [
                 [route('centros.index'), 'fa-building-columns', 'Centros de formación', $activo('centros')],
@@ -70,24 +80,40 @@
                 [route('inscripciones.index'), 'fa-file-signature', 'Inscripciones', $activo('inscripciones')],
                 [route('noticias.index'), 'fa-newspaper', 'Noticias', $activo('noticias')],
             ],
-        ]
-        : [
-            'Principal' => [
-                [route('home'), 'fa-house', 'Inicio', request()->is('home')],
+        ];
+    } elseif ($conSesion) {
+        $secciones = [
+            'Principal' => [[route('home'), 'fa-house', 'Inicio', request()->is('home')], ...$comunidad],
+            'Sitio' => [
+                [route('publico.ofertas'), 'fa-bullhorn', 'Convocatorias', false],
                 [route('publico.inicio'), 'fa-globe', 'Sitio público', false],
             ],
         ];
+    } else {
+        $secciones = [
+            'Comunidad SENA' => $comunidad,
+            'Sitio' => [
+                [route('publico.ofertas'), 'fa-bullhorn', 'Convocatorias', false],
+                [route('publico.noticias'), 'fa-newspaper', 'Noticias', false],
+                [route('publico.inicio'), 'fa-globe', 'Sitio público', false],
+            ],
+        ];
+    }
 @endphp
-<aside
-    class="sticky top-0 z-30 flex h-screen w-72 shrink-0 flex-col overflow-hidden border-r border-white/[0.06] bg-[#081B28] text-slate-300 shadow-xl"
+<aside data-menu
+    class="fixed inset-y-0 left-0 z-40 flex h-screen w-72 shrink-0 -translate-x-full flex-col overflow-hidden border-r border-white/[0.06] bg-[#081B28] text-slate-300 shadow-2xl transition-transform duration-300 ease-out motion-reduce:transition-none lg:static lg:z-30 lg:translate-x-0 lg:shadow-xl"
     aria-label="Menú de navegación">
+    <button type="button" data-menu-cerrar aria-label="Cerrar menú"
+        class="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-white/10 hover:text-white lg:hidden">
+        <i class="fa-solid fa-xmark"></i>
+    </button>
     {{-- Fondo decorativo --}}
     <div class="pointer-events-none absolute inset-x-0 top-0 h-52 bg-gradient-to-b from-[#39A900]/[0.07] to-transparent">
     </div>
     <div class="pointer-events-none absolute -right-20 top-24 h-48 w-48 rounded-full bg-[#39A900]/[0.07] blur-3xl"></div>
     {{-- Identidad institucional --}}
     <div class="relative shrink-0 px-5 pb-5 pt-6">
-        <a href="{{ route('home') }}"
+        <a href="{{ $conSesion ? route('home') : route('publico.inicio') }}"
             class="group flex items-center gap-3.5 rounded-2xl p-2 transition-colors hover:bg-white/[0.04]">
             <div
                 class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] p-2 shadow-sm transition-all duration-200 group-hover:border-[#39A900]/40 group-hover:bg-white/[0.09]">
@@ -126,48 +152,46 @@
             </div>
         @endforeach
     </nav>
-    {{-- Perfil del administrador --}}
+    {{-- Perfil del usuario o acceso para visitantes --}}
     <div class="relative shrink-0 border-t border-white/[0.08] bg-[#061620] p-4">
-        <div class="mb-3 flex items-center gap-2 px-1">
-            <span class="h-1.5 w-1.5 rounded-full bg-[#39A900] shadow-[0_0_6px_rgba(57,169,0,0.7)]"></span>
-            <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-                Sesión activa
-            </span>
-        </div>
-        <div class="flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.035] p-3">
-            {{-- Avatar --}}
-            <div
-                class="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-[#39A900] to-[#247A16] text-sm font-extrabold text-white shadow-md">
-                @if ($fotoUsuario)
-                    <img src="{{ $fotoUsuario }}" alt="Foto de perfil" class="h-full w-full object-cover">
-                @else
-                    {{ mb_strtoupper(mb_substr($nombreUsuario, 0, 1)) }}
-                @endif
-                <span
-                    class="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-[#061620] bg-[#65D62E]"></span>
-            </div>
-            {{-- Datos --}}
-            <div class="min-w-0 flex-1">
-                <p class="truncate text-xs font-bold text-white">
-                    {{ $nombreUsuario }}
-                </p>
-                <p class="mt-1 truncate text-[10px] text-slate-400">
-                    {{ data_get($usuario, 'email', '') }}
-                </p>
-            </div>
-            {{-- Cerrar sesión --}}
-            @if (Route::has('logout'))
-                <form action="{{ route('logout') }}" method="POST">
+        @if ($conSesion)
+            <div class="flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.035] p-3">
+                <div
+                    class="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-[#39A900] to-[#247A16] text-sm font-extrabold text-white shadow-md">
+                    @if ($fotoUsuario)
+                        <img src="{{ $fotoUsuario }}" alt="Foto de perfil" class="h-full w-full object-cover">
+                    @else
+                        {{ Vista::iniciales($usuario) }}
+                    @endif
+                    <span
+                        class="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-[#061620] bg-[#65D62E]"></span>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <p class="truncate text-xs font-bold text-white">{{ $nombreUsuario }}</p>
+                    <p class="mt-1 truncate text-[11px] text-slate-400">{{ data_get($usuario, 'rol', 'Usuario') }}</p>
+                </div>
+                <form action="{{ route('logout') }}" method="POST" data-sin-carga>
                     @csrf
                     <button type="submit" aria-label="Cerrar sesión" title="Cerrar sesión"
-                        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-400 transition-all hover:bg-rose-500/10 hover:text-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-500/30">
+                        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-400 transition-all hover:bg-rose-500/10 hover:text-rose-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500/30">
                         <i class="fa-solid fa-right-from-bracket text-sm" aria-hidden="true"></i>
                     </button>
                 </form>
-            @endif
-        </div>
-        <p class="mt-3 text-center text-[10px] tracking-wide text-slate-600">
-            {{ data_get($usuario, 'rol', 'Usuario') }} <span class="mx-1">·</span> AdminSena
-        </p>
+            </div>
+        @else
+            <p class="px-1 text-xs leading-5 text-slate-400">
+                Consulta y registra instructores y aprendices sin cuenta. Para administrar el resto, inicia sesión como administrador.
+            </p>
+            <div class="mt-3 grid grid-cols-2 gap-2">
+                <a href="{{ route('login') }}"
+                    class="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2.5 text-xs font-semibold text-white transition hover:bg-white/10">
+                    <i class="fa-solid fa-right-to-bracket"></i> Ingresar
+                </a>
+                <a href="{{ route('registro') }}"
+                    class="flex items-center justify-center gap-2 rounded-xl bg-[#39A900] px-3 py-2.5 text-xs font-semibold text-white transition hover:bg-[#2e8800]">
+                    <i class="fa-solid fa-user-plus"></i> Registrarme
+                </a>
+            </div>
+        @endif
     </div>
 </aside>

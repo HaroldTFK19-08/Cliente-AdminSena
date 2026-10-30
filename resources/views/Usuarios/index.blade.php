@@ -92,10 +92,27 @@
             return '<span class="text-gray-400">—</span>';
         };
         $fotoDe = fn($u) => (string) Vista::archivo($get($u, ['foto_perfil'], ''));
+
+        // Garantizar orden: los usuarios más recientes de primero
+        usort($usuarios, function ($a, $b) {
+            $fechaA = (string) (data_get($a, 'created_at') ?: ('1970-01-01 ' . str_pad((string) data_get($a, 'id', 0), 10, '0', STR_PAD_LEFT)));
+            $fechaB = (string) (data_get($b, 'created_at') ?: ('1970-01-01 ' . str_pad((string) data_get($b, 'id', 0), 10, '0', STR_PAD_LEFT)));
+            return strcmp($fechaB, $fechaA);
+        });
+
         $total = count($usuarios);
         $instructores = count(array_filter($usuarios, fn($u) => strtolower($rolDe($u)) === 'instructor'));
         $aprendices = count(array_filter($usuarios, fn($u) => strtolower($rolDe($u)) === 'aprendiz'));
         $aspirantes = count(array_filter($usuarios, fn($u) => strtolower($rolDe($u)) === 'aspirante'));
+        $recientes = count(array_filter($usuarios, function ($u) {
+            $creado = data_get($u, 'created_at');
+            if (!$creado) return false;
+            try {
+                return \Illuminate\Support\Carbon::parse($creado)->diffInDays(now()) <= 7;
+            } catch (\Throwable) {
+                return false;
+            }
+        }));
     @endphp
     <div class="space-y-6">
         {{-- Encabezado --}}
@@ -141,9 +158,17 @@
                 </div>
                 <div>
                     <p class="text-sm text-gray-500">Total de usuarios</p>
-                    <p class="mt-1 text-2xl font-bold text-gray-900">
-                        {{ $total }}
-                    </p>
+                    <div class="mt-1 flex items-baseline gap-2">
+                        <p class="text-2xl font-bold text-gray-900">
+                            {{ $total }}
+                        </p>
+                        @if ($recientes > 0)
+                            <span class="inline-flex items-center gap-1 rounded-full bg-[#E8F7DF] px-2 py-0.5 text-[10px] font-bold text-[#278000]">
+                                <span class="h-1.5 w-1.5 rounded-full bg-[#39A900]"></span>
+                                {{ $recientes }} recientes
+                            </span>
+                        @endif
+                    </div>
                 </div>
             </div>
             <div class="flex items-center gap-4 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
@@ -207,6 +232,7 @@
                             <th class="px-6 py-4 font-semibold">Identificación</th>
                             <th class="px-6 py-4 font-semibold">Rol</th>
                             <th class="px-6 py-4 font-semibold">Detalle</th>
+                            <th class="px-6 py-4 font-semibold">Registro</th>
                             <th class="px-6 py-4 text-right font-semibold">Acciones</th>
                         </tr>
                     </thead>
@@ -261,6 +287,36 @@
                                     {!! $detalleDe($usuario) !!}
                                 </td>
 
+                                {{-- Registro --}}
+                                <td class="px-6 py-4">
+                                    @php
+                                        $creado = data_get($usuario, 'created_at');
+                                        $esReciente = false;
+                                        if ($creado) {
+                                            try {
+                                                $fechaObj = \Illuminate\Support\Carbon::parse($creado);
+                                                $esReciente = $fechaObj->diffInDays(now()) <= 7;
+                                            } catch (\Throwable) {}
+                                        }
+                                    @endphp
+                                    <div class="flex items-center gap-2">
+                                        <div>
+                                            <p class="text-xs font-semibold text-gray-800">
+                                                {{ $creado ? Vista::fechaCorta($creado) : '—' }}
+                                            </p>
+                                            <p class="text-[11px] text-gray-400">
+                                                {{ $creado ? Vista::fecha($creado, 'g:i A') : '' }}
+                                            </p>
+                                        </div>
+                                        @if ($esReciente)
+                                            <span class="inline-flex items-center gap-1 rounded-full bg-[#E8F7DF] px-2 py-0.5 text-[10px] font-bold text-[#278000] ring-1 ring-[#39A900]/25">
+                                                <span class="h-1.5 w-1.5 rounded-full bg-[#39A900]"></span>
+                                                Nuevo
+                                            </span>
+                                        @endif
+                                    </div>
+                                </td>
+
                                 {{-- Acciones --}}
                                 <td class="px-6 py-4">
                                     <div class="flex items-center justify-end gap-2">
@@ -275,7 +331,7 @@
                                             <i class="fa-solid fa-pen-to-square"></i>
                                         </a>
                                         <form action="{{ route('usuarios.destroy', data_get($usuario, 'id')) }}" method="POST"
-                                            onsubmit="return confirm('¿Seguro que deseas eliminar este usuario?')">
+                                            data-confirmar="¿Seguro que deseas eliminar este usuario?">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" title="Eliminar usuario" aria-label="Eliminar usuario"
@@ -288,7 +344,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="px-6 py-16 text-center">
+                                <td colspan="6" class="px-6 py-16 text-center">
                                     <div
                                         class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100 text-gray-400">
                                         <i class="fa-solid fa-users text-2xl"></i>
@@ -307,7 +363,7 @@
 
                         {{-- Resultado de búsqueda vacío --}}
                         <tr id="sinResultados" class="hidden">
-                            <td colspan="5" class="px-6 py-12 text-center text-gray-500">
+                            <td colspan="6" class="px-6 py-12 text-center text-gray-500">
                                 <i class="fa-solid fa-magnifying-glass mb-3 block text-2xl text-gray-300"></i>
                                 No se encontraron usuarios que coincidan con la búsqueda.
                             </td>

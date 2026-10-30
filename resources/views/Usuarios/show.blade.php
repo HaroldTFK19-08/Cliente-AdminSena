@@ -197,9 +197,10 @@
 
             {{-- Información de instructor --}}
             @if ($teacher)
-                <h3 class="mb-5 mt-10 text-base font-bold text-gray-900">
-                    Información de instructor
-                </h3>
+                <div class="mb-5 mt-10 flex items-center justify-between gap-4">
+                    <h3 class="text-base font-bold text-gray-900">Información de instructor</h3>
+                    <a href="{{ route('instructores.show', $get($teacher, ['id'])) }}" class="enlace text-sm">Ver detalle del instructor</a>
+                </div>
 
                 <div class="grid gap-5 sm:grid-cols-2">
                     <div class="rounded-xl border border-gray-100 bg-gray-50 p-5">
@@ -256,9 +257,10 @@
 
             {{-- Información de aprendiz --}}
             @if ($apprentice)
-                <h3 class="mb-5 mt-10 text-base font-bold text-gray-900">
-                    Información de aprendiz
-                </h3>
+                <div class="mb-5 mt-10 flex items-center justify-between gap-4">
+                    <h3 class="text-base font-bold text-gray-900">Información de aprendiz</h3>
+                    <a href="{{ route('aprendices.show', $get($apprentice, ['id'])) }}" class="enlace text-sm">Ver detalle del aprendiz</a>
+                </div>
 
                 <div class="grid gap-5 sm:grid-cols-2">
                     <div class="rounded-xl border border-gray-100 bg-gray-50 p-5">
@@ -280,6 +282,10 @@
                             {{ $get($apprentice, ['id'], 'No disponible') }}
                         </p>
                     </div>
+
+                    @include('Includes.dato', ['etiqueta' => 'Ficha', 'valor' => trim($get($apprentice, ['coursegroup.codigo'], '') . ' ' . ($get($apprentice, ['coursegroup.program.nombre']) ? '— ' . $get($apprentice, ['coursegroup.program.nombre']) : '')), 'icono' => 'fa-users-rectangle'])
+                    @include('Includes.dato', ['etiqueta' => 'Inicio de formación', 'valor' => Vista::fecha($get($apprentice, ['fecha_inicio']), 'd/m/Y', ''), 'icono' => 'fa-calendar-day'])
+                    @include('Includes.dato', ['etiqueta' => 'Fin de formación', 'valor' => Vista::fecha($get($apprentice, ['fecha_fin']), 'd/m/Y', 'En curso'), 'icono' => 'fa-flag-checkered'])
                 </div>
             @endif
 

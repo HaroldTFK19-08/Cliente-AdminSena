@@ -163,7 +163,7 @@
 
                                         <form action="{{ route('centros.destroy', data_get($centro, 'id')) }}"
                                             method="POST"
-                                            onsubmit="return confirm('¿Estás seguro de que deseas eliminar este centro de formación?')">
+                                            data-confirmar="¿Estás seguro de que deseas eliminar este centro de formación?">
                                             @csrf
                                             @method('DELETE')
 

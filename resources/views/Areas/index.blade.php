@@ -174,7 +174,7 @@
                                             <i class="fa-solid fa-pen-to-square text-xs"></i>
                                         </a>
                                         <form action="{{ route('areas.destroy', $area['id']) }}" method="POST"
-                                            onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta área?')">
+                                            data-confirmar="¿Estás seguro de que deseas eliminar esta área?">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" title="Eliminar área" aria-label="Eliminar área"

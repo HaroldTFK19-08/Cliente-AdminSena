@@ -227,7 +227,7 @@
 
                                     <form action="{{ route('ambientes.destroy', data_get($ambiente, 'id')) }}"
                                         method="POST"
-                                        onsubmit="return confirm('¿Estás seguro de que deseas eliminar este ambiente de formación?');">
+                                        data-confirmar="¿Estás seguro de que deseas eliminar este ambiente de formación?">
                                         @csrf
                                         @method('DELETE')
 

@@ -6,16 +6,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
 /**
- * Perfiles por rol: admins, instructores, aprendices y aspirantes.
- * El {tipo} de la ruta es el mismo recurso de la API (/admins, /instructores, ...).
+ * Perfiles por rol: admins y aspirantes.
+ * El {tipo} de la ruta es el mismo recurso de la API (/admins, /aspirantes).
+ * Aprendices e instructores tienen su propio CRUD (AprendicesController e InstructoresController).
  */
 class PerfilesController extends Controller
 {
     /** Datos de cada tipo de perfil para las vistas. */
     public const TIPOS = [
         'admins' => ['rol' => 'Admin', 'relacion' => 'admin', 'titulo' => 'Administradores', 'singular' => 'administrador', 'icono' => 'fa-user-tie'],
-        'instructores' => ['rol' => 'Instructor', 'relacion' => 'teacher', 'titulo' => 'Instructores', 'singular' => 'instructor', 'icono' => 'fa-chalkboard-user'],
-        'aprendices' => ['rol' => 'Aprendiz', 'relacion' => 'apprentice', 'titulo' => 'Aprendices', 'singular' => 'aprendiz', 'icono' => 'fa-user-graduate'],
         'aspirantes' => ['rol' => 'Aspirante', 'relacion' => 'aspirant', 'titulo' => 'Aspirantes', 'singular' => 'aspirante', 'icono' => 'fa-user-clock'],
     ];
 
@@ -37,9 +36,7 @@ class PerfilesController extends Controller
         $url = env('URL_API');
         $config = self::TIPOS[$tipo];
         $usuarios = $this->fetch($url . '/usuarios');
-        $areas = $this->fetch($url . '/areas');
-        $fichas = $this->fetch($url . '/fichas');
-        return view('Perfiles.create', compact('tipo', 'config', 'usuarios', 'areas', 'fichas'));
+        return view('Perfiles.create', compact('tipo', 'config', 'usuarios'));
     }
     public function store(Request $request, string $tipo)
     {
@@ -57,9 +54,7 @@ class PerfilesController extends Controller
         $config = self::TIPOS[$tipo];
         $perfil = $this->fetch($url . '/' . $tipo . '/' . $id);
         $usuarios = $this->fetch($url . '/usuarios');
-        $areas = $this->fetch($url . '/areas');
-        $fichas = $this->fetch($url . '/fichas');
-        return view('Perfiles.edit', compact('tipo', 'config', 'perfil', 'usuarios', 'areas', 'fichas'));
+        return view('Perfiles.edit', compact('tipo', 'config', 'perfil', 'usuarios'));
     }
     public function update(Request $request, string $tipo, int $id)
     {
